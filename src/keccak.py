@@ -92,6 +92,73 @@ class Keccak:
             raise Exception("Invalid SHA3 type")
         self.state = bytearray((self.r + self.c) // 8)
     
+    def rotation64(self, val, shift_num):
+        """
+        Rotation for 64 bit.
+        """
+        return ((val >> (64-(shift_num % 64))) + (val << (shift_num % 64))) % 1 << 64
+
+    def load64(bytearray):
+        """
+        Load a 64-bit value using the little-endian (LE) convention.
+        """
+        return sum((bytearray[i] << (8*i)) for i in range(8))
+
+    def store64(val):
+        """
+        Store a 64-bit value using the little-endian (LE) convention.
+        """
+        return list((val >> (8*i)) % 256 for i in range(8))
+    
+    def keccakPermutation(self):
+        """
+        Permute keccak state.
+        """
+        # Map current state to 2 dimension 5*5 state 
+        mapped_state=[]
+        for i in range(5):
+            row = []
+            for j in range(5):
+                row.append(self.load64(self.state[8*(i+5*j):8*(i+5*j)+8]))
+            mapped_state.append(row)
+        
+        # ROUND
+        for round_num in range(self.round):
+            # θ step
+            # Initiate variable
+            C = []
+            D = []
+
+            # Fill C, D, and modify mapped state value.
+            for i in range(5):
+                C.append(mapped_state[i][0] ^ mapped_state[i][1] ^ mapped_state[i][2] ^ mapped_state[i][3] ^ mapped_state[i][4])
+            for i in range(5):
+                D.append(C[(i-1)%5] ^ self.rotation64(C[(i+1)%5], 1))
+            for i in range(5):
+                row = []
+                for j in range(5):
+                    row.append(mapped_state[i][j] ^ D[i])
+                mapped_state[i] = row
+
+            # ρ and π steps
+            B = [[0 for i in range (5)] for j in range (5)]
+            for x in range(5):
+                for y in range(5):
+                    B[y][(2*x+3*y)%5] = self.rotation64(mapped_state[x][y], self.rotation_offsets[y][x])
+            
+            # χ steps.
+            for x in range(5):
+                for y in range(5):
+                    mapped_state[x][y] = B[x][y] ^ ((~B[(x+1)%5][y] & (B[(x+2)%5][y])))
+
+            # ι steps.
+            mapped_state[0][0] = mapped_state[0][0] ^ self.round_constants[round_num]
+        
+        # Map 2 dimension 5*5 state to current state. 
+        for i in range(5):
+            for j in range(5):
+                self.state[8*(i+5*j):8*(i+5*j)+8] = self.store64(mapped_state[i][j])
+
     def hash(self):
         """
         Hash the current message. Return the message digest, also modify the attributes.
@@ -118,6 +185,10 @@ class Keccak:
                 # Xor the state with padding if required.
                 for y in range(diff):
                     self.state[j+y] ^= self.d
+                
+                # Xor last byte
+                self.state[rate_bytes-1] = self.state[rate_bytes-1] ^ 0x80
+                
             else:
                 # Xor the state and message.
                 message_block = self.byte_message[i*rate_bytes: i*rate_bytes+rate_bytes]
