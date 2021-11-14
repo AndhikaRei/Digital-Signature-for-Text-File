@@ -1,7 +1,8 @@
 # Import external dependency.
+import binascii
 import math
 from typing import List
-from math import ceil
+from copy import deepcopy
 
 # Import own dependency.
 
@@ -36,7 +37,6 @@ class Keccak:
         Digest message in bytes
     """
 
-
     def __init__(self, type:str, message:str) -> None:
         """
         Constructor for Keccak class
@@ -66,7 +66,7 @@ class Keccak:
         ]
         self.d =  0x06
         self.original_message = message
-        self.byte_message = bytearray(message, "utf-8")
+        self.byte_message = bytearray(message, "cp1252")
         self.message_digest=""
         self.byte_message_digest=bytearray()
         self.round = 24
@@ -98,13 +98,13 @@ class Keccak:
         """
         return ((val >> (64-(shift_num % 64))) + (val << (shift_num % 64))) % 1 << 64
 
-    def load64(bytearray):
+    def load64(self, bytearray):
         """
         Load a 64-bit value using the little-endian (LE) convention.
         """
         return sum((bytearray[i] << (8*i)) for i in range(8))
 
-    def store64(val):
+    def store64(self, val):
         """
         Store a 64-bit value using the little-endian (LE) convention.
         """
@@ -141,6 +141,7 @@ class Keccak:
                 mapped_state[i] = row
 
             # ρ and π steps
+            # B = deepcopy(mapped_state)
             B = [[0 for i in range (5)] for j in range (5)]
             for x in range(5):
                 for y in range(5):
@@ -159,14 +160,13 @@ class Keccak:
             for j in range(5):
                 self.state[8*(i+5*j):8*(i+5*j)+8] = self.store64(mapped_state[i][j])
 
-    def hash(self):
+    def hash(self)->str:
         """
         Hash the current message. Return the message digest, also modify the attributes.
         """
-
         # Absorbing
         # Calculate num of block used.
-        rate_bytes = self.rate // 8
+        rate_bytes = self.r // 8
         num_of_block = math.ceil(len(self.original_message)/ rate_bytes)
 
         # Begin absorbing
@@ -186,9 +186,6 @@ class Keccak:
                 for y in range(diff):
                     self.state[j+y] ^= self.d
                 
-                # Xor last byte
-                self.state[rate_bytes-1] = self.state[rate_bytes-1] ^ 0x80
-                
             else:
                 # Xor the state and message.
                 message_block = self.byte_message[i*rate_bytes: i*rate_bytes+rate_bytes]
@@ -197,3 +194,29 @@ class Keccak:
             
             # Permute the current state
             self.keccakPermutation()
+        
+        # Begin squeezing
+        byte_output_length = self.output_length // 8
+        num_of_block = math.ceil(byte_output_length / rate_bytes)
+
+        for i in range(num_of_block):
+            # Last squezing
+            if (i == num_of_block-1):
+                remaining_block = byte_output_length - (i * rate_bytes)
+                self.byte_message_digest += self.state[0:remaining_block]
+            else:
+                self.byte_message_digest += self.state[0:rate_bytes]
+                self.keccakPermutation()
+
+        # self.message_digest = binascii.hexlify(self.byte_message_digest).upper()
+        self.message_digest = self.byte_message_digest
+        print(self.byte_message_digest)
+        return self.message_digest   
+
+def main():
+    message = "Ikkeh kimochi nikmat yamete kudasai"
+    keccak = Keccak("SHA3-256", message)
+    print(keccak.byte_message[1])
+    
+if __name__ == "__main__":
+    main()
