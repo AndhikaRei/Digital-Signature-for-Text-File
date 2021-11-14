@@ -66,7 +66,7 @@ class Keccak:
         ]
         self.d =  0x06
         self.original_message = message
-        self.byte_message = bytearray(message, "cp1252")
+        self.byte_message = bytearray(message, "utf-8")
         self.message_digest=""
         self.byte_message_digest=bytearray()
         self.round = 24
@@ -96,19 +96,28 @@ class Keccak:
         """
         Rotation for 64 bit.
         """
-        return ((val >> (64-(shift_num % 64))) + (val << (shift_num % 64))) % 1 << 64
+        return ((val >> (64-(shift_num % 64))) + (val << (shift_num % 64))) % (1 << 64)
 
     def load64(self, bytearray):
         """
-        Load a 64-bit value using the little-endian (LE) convention.
+        Load a 64-bit value using the little-endian format.
         """
-        return sum((bytearray[i] << (8*i)) for i in range(8))
+        res = 0
+        for i in range(7,-1,-1):
+            res <<= 8
+            res |= bytearray[i]
+        return res
+ 
 
     def store64(self, val):
         """
         Store a 64-bit value using the little-endian (LE) convention.
         """
-        return list((val >> (8*i)) % 256 for i in range(8))
+        res = []
+        for _ in range(8):
+            res.append(val % 256)
+            val >>= 8
+        return res
     
     def keccakPermutation(self):
         """
@@ -121,8 +130,9 @@ class Keccak:
             for j in range(5):
                 row.append(self.load64(self.state[8*(i+5*j):8*(i+5*j)+8]))
             mapped_state.append(row)
+        # print("Mapped state")
+        # print(mapped_state)
         
-        # ROUND
         for round_num in range(self.round):
             # θ step
             # Initiate variable
@@ -192,9 +202,9 @@ class Keccak:
                 for j in range(rate_bytes):
                     self.state[j] ^= message_block[j]
             
-            # Permute the current state
             self.keccakPermutation()
-        
+            
+
         # Begin squeezing
         byte_output_length = self.output_length // 8
         num_of_block = math.ceil(byte_output_length / rate_bytes)
@@ -208,15 +218,17 @@ class Keccak:
                 self.byte_message_digest += self.state[0:rate_bytes]
                 self.keccakPermutation()
 
-        # self.message_digest = binascii.hexlify(self.byte_message_digest).upper()
-        self.message_digest = self.byte_message_digest
-        print(self.byte_message_digest)
+        self.message_digest = binascii.hexlify(self.byte_message_digest).upper()
+        self.message_digest = self.message_digest.decode("utf-8")
         return self.message_digest   
 
 def main():
-    message = "Ikkeh kimochi nikmat yamete kudasai"
+    message = "aaaaaaaaaaaaaaaaaaaa"
     keccak = Keccak("SHA3-256", message)
-    print(keccak.byte_message[1])
+    print(keccak.hash())
     
 if __name__ == "__main__":
     main()
+
+# aaaaaaaaaaaaaaaaaaaa
+# 255AA50C417EA6C85C15F2D0F7BFECA367E900B8BF7C7C6FEED0C9003C2A9E03
