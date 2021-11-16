@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>E-Sign Verify Documents</title>
+{% endblock %}
+
+{% block body %}
+<!-- MAIN -->
+<div class="col p-4">
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{error}}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endif %}
+    <h1 class="display-4">E-Sign Verify Documents</h1>
+    <div class="card">
+        <h5 class="card-header font-weight-light">Requirements</h5>
+        <div class="card-body">
+            <form action="/verify" method="POST">
+                <h6 class="card-header font-weight-light">Public Key = [e, n]</h6>
+                <input type="file" class="form-control-file" name="file" id="public-key-file-input">
+                <div class="form-group">
+                    <label for="text1">e</label>
+                    <input type="number" class="form-control" name="text1" placeholder="Enter value of e here" id=public1 value="{{e}}">
+                </div>
+                <div class="form-group">
+                    <label for="text2">n</label>
+                    <input type="number" class="form-control" name="text2" placeholder="Enter value of n here" id=public2 value="{{n}}">
+                </div>
+                <div class="form-group">
+                    <label for="text3">Signed Document</label>
+                    <textarea name="text3" placeholder="Enter signed document here" id="text-input">{{signed_document}}</textarea>
+                    <input type="file" class="form-control-file" name="file" id="text-file-input">
+                </div>
+                <button type="submit" class="btn btn-primary">Verify Document</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <h5 class="card-header font-weight-light">Result</h5>
+        <div class="card-body">
+            <form action="/saveresult" method="POST">
+                <div class="form-group">    
+                    <label for="text">Verified Status</label>
+                    <input type="text" readonly class="form-control" name="result" value="{{status}}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+</div><!-- Main Col END -->
+{% endblock %}

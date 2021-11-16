@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>E-Sign Generate Key</title>
+{% endblock %}
+
+{% block body %}
+<!-- MAIN -->
+<div class="col p-4">
+    <h1 class="display-4">Generate Public Key and Private Key with RSA Algorithm</h1>
+    <div class="card">
+        <div class="card-body">
+            <form action="/generate" method="POST">
+                <button type="submit" class="btn btn-primary">Generate Key</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <h5 class="card-header font-weight-light">Key</h5>
+        <div class="card-body">
+            <form action="/savepublickey" method="POST">
+                <div class="form-group">    
+                    <label for="text">Public Key</label>
+                    <input type="text" readonly class="form-control" name="public" value="{{public}}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Public Key</button>
+            </form>
+            <form action="/saveprivatekey" method="POST">
+                <div class="form-group">    
+                    <label for="text">Private Key</label>
+                    <input type="text" readonly class="form-control" name="private" value="{{private}}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Private Key</button>
+            </form>
+        </div>
+    </div>
+</div><!-- Main Col END -->
+{% endblock %}

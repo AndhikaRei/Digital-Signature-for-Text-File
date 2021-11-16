@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- CSS Stylesheet -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+            integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        {% block head %}{% endblock %}
+    </head>
+
+    <body>
+        <!-- Bootstrap NavBar -->
+        <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                <img src="{{url_for('static', filename='images/cypher.png')}}" width="30" height="30" class="d-inline-block align-top" alt="">
+                <span class="menu-collapsed">Cypher E-Sign</span>
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <!-- This menu is hidden in bigger devices with d-sm-none. 
+                The sidebar isn't proper for smaller screens imo, so this dropdown menu can keep all the useful sidebar itens exclusively for smaller screens  -->
+                    <li class="nav-item dropdown d-sm-block d-md-none">
+                        <a class="nav-link dropdown-toggle" href="#" id="smallerscreenmenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Menu </a>
+                        <div class="dropdown-menu" aria-labelledby="smallerscreenmenu">
+                            <a class="dropdown-item" href="/generate">Generate Key</a>
+                            <a class="dropdown-item" href="/sign">Sign Document</a>
+                            <a class="dropdown-item" href="/verify">Verify Document</a>
+                        </div>
+                    </li><!-- Smaller devices menu END -->
+                </ul>
+            </div>
+        </nav><!-- NavBar END -->
+        
+        <!-- Bootstrap row -->
+        <div class="row" id="body-row">
+            <!-- Sidebar -->
+            <div id="sidebar-container" class="sidebar-expanded d-none d-md-block">
+                <!-- d-* hiddens the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
+                <!-- Bootstrap List Group -->
+                <ul class="list-group">
+                    <a href="/generate" class="bg-dark list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="fa fa-key fa-fw mr-3"></span>
+                            <span class="menu-collapsed">Generate Key</span>
+                        </div>
+                    </a>
+                    <a href="/sign" class="bg-dark list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="fa fa-key fa-fw mr-3"></span>
+                            <span class="menu-collapsed">Sign Document</span>
+                        </div>
+                    </a>
+                    <a href="/verify" class="bg-dark list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-start align-items-center">
+                            <span class="fa fa-key fa-fw mr-3"></span>
+                            <span class="menu-collapsed">Verify Document</span>
+                        </div>
+                    </a>
+                </ul>
+            </div><!-- sidebar-container END -->
+            {% block body %}{% endblock %}
+        </div><!-- body-row END -->
+        
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+        </script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+        </script>
+        <script>
+
+            function handleFileSelect(event) {
+                const reader = new FileReader()
+                reader.onload = handleFileLoad;
+                reader.readAsText(event.target.files[0])
+            }
+
+            function handleFileLoad(event) {
+                console.log(event);
+                document.getElementById('text-input').value = event.target.result;
+            }            
+            if (document.getElementById('text-file-input')) {
+                document.getElementById('text-file-input').addEventListener('change', handleFileSelect, false);
+            }
+            
+            function handlePublicKeyFileSelect(event) {
+                const reader = new FileReader()
+                reader.onload = handlePublicKeyFileLoad;
+                reader.readAsText(event.target.files[0])
+            }
+
+            function handlePublicKeyFileLoad(event) {
+                console.log(event);
+                var key = event.target.result;
+                key = key.replace('[', '').replace(']', '').replace('(', '').replace(')', '').replaceAll(' ', '');
+                console.log(key);
+                arr_key = key.split(",")
+                console.log(arr_key)
+                arr_key.forEach((val, idx) => {
+                    console.log('public'+(idx+1))
+                    document.getElementById('public'+(idx+1)).value = arr_key[idx];
+                });
+            }            
+
+            if (document.getElementById('public-key-file-input')) {
+                document.getElementById('public-key-file-input').addEventListener('change', handlePublicKeyFileSelect, false);
+            }
+
+            function handlePrivateKeyFileSelect(event) {
+                const reader = new FileReader()
+                reader.onload = handlePrivateKeyFileLoad;
+                reader.readAsText(event.target.files[0])
+            }
+
+            function handlePrivateKeyFileLoad(event) {
+                console.log(event);
+                var key = event.target.result;
+                key = key.replace('[', '').replace(']', '').replace('(', '').replace(')', '').replaceAll(' ', '');
+                arr_key = key.split(",")
+                arr_key.forEach((val, idx) => {
+                    console.log('private'+(idx+1))
+                    document.getElementById('private'+(idx+1)).value = arr_key[idx];
+                });
+            }            
+
+            document.getElementById('private-key-file-input').addEventListener('change', handlePrivateKeyFileSelect, false);
+            
+        </script>
+    </body>
+
+</html>
+<!DOCTYPE html>

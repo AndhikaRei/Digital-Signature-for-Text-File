@@ -14,18 +14,22 @@ class Signature:
     """
     keccak = Keccak("SHA3-256", message)
     hash = keccak.hash()
-
-    return RSA.encrypt(hash, private_key)
+    signature = RSA.encrypt(hash, private_key)
+    signed_message = message + "\n<ds>\n" + signature + "\n</ds>"
+    return signed_message
 
   @staticmethod
-  def verify(message: str, signature: str, public_key: List[int]) -> bool:
+  def verify(signed_message: str, public_key: List[int]) -> bool:
     """
     Verify signature of a given message and signature.
     """
-    keccak = Keccak("SHA3-256", message)
+    signed_message = signed_message.replace('</ds>', '').replace('\r\n', '')
+    signed_message = signed_message.split('<ds>')
+    print(signed_message)
+    keccak = Keccak("SHA3-256", signed_message[0])
     hash = keccak.hash()
 
-    decrypted = RSA.decrypt(signature, public_key)
+    decrypted = RSA.decrypt(signed_message[1], public_key)
 
     return hash == decrypted
 
@@ -36,10 +40,10 @@ def main():
   keys = RSA.generateKey()
   print("Keys:", keys)
 
-  signature = Signature.sign(message, keys[1])
-  print("Signature:", signature)
+  signed_message = Signature.sign(message, keys[1])
+  print("Signed_Message:", signed_message)
 
-  verify = Signature.verify(message, signature, keys[0])
+  verify = Signature.verify(signed_message, keys[0])
   print("Verify:", verify)
     
 if __name__ == "__main__":
