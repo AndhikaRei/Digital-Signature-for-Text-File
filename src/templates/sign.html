@@ -8,10 +8,13 @@
 <!-- MAIN -->
 <div class="col p-4">
     <h1 class="display-4">E-Sign Documents Signing</h1>
+    {% if mode=="combined" %}
+    <a class="btn btn-primary" href="/sign/combined" role="button">Combine Sign and Document</a>
+    <a class="btn btn-secondary" href="/sign/seperated" role="button">Seperate Sign and Document</a>
     <div class="card">
         <h5 class="card-header font-weight-light">Requirements</h5>
         <div class="card-body">
-            <form action="/sign" method="POST">
+            <form action="/sign/combined" method="POST">
                 <h6 class="card-header font-weight-light">Private Key = [d, n]</h6>
                 <input type="file" class="form-control-file" name="file" id="public-key-file-input">
                 <div class="form-group">
@@ -38,11 +41,56 @@
                 <div class="form-group">
                     <label for="text">Signed Document</label>
                     <textarea readonly name="result">{{signed}}</textarea>
-                    <!-- <input type="text" readonly class="form-control" name="result" value="{{signed}}"> -->
                 </div>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Save Signed Document</button>
             </form>
         </div>
     </div>
+    {% else %}
+    <a class="btn btn-secondary" href="/sign/combined" role="button">Combine Sign and Document</a>
+    <a class="btn btn-primary" href="/sign/seperated" role="button">Seperate Sign and Document</a>
+    <div class="card">
+        <h5 class="card-header font-weight-light">Requirements</h5>
+        <div class="card-body">
+            <form action="/sign/seperated" method="POST">
+                <h6 class="card-header font-weight-light">Private Key = [d, n]</h6>
+                <input type="file" class="form-control-file" name="file" id="public-key-file-input">
+                <div class="form-group">
+                    <label for="text1">d</label>
+                    <input type="number" class="form-control" name="text1" placeholder="Enter value of d here" id="public1" value="{{d}}">
+                </div>
+                <div class="form-group">
+                    <label for="text2">n</label>
+                    <input type="number" class="form-control" name="text2" placeholder="Enter value of n here" id="public2" value="{{n}}">
+                </div>
+                <div class="form-group">
+                    <label for="text3">Document</label>
+                    <textarea name="text3" placeholder="Enter document here" id="text-input">{{document}}</textarea>
+                    <input type="file" class="form-control-file" name="file" id="text-file-input">
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Document</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <h5 class="card-header font-weight-light">Result</h5>
+        <div class="card-body">
+            <form action="/savedocument" method="POST">
+                <div class="form-group">
+                    <label for="docs">Document</label>
+                    <textarea readonly name="docs">{{document}}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Document</button>
+            </form>
+            <form action="/saveresult" method="POST">
+                <div class="form-group">
+                    <label for="result">Signature</label>
+                    <input type="text" readonly class="form-control" name="result" value="{{signed}}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Signature</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div><!-- Main Col END -->
 {% endblock %}

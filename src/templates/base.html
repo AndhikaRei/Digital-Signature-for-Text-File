@@ -36,8 +36,8 @@
                         <a class="nav-link dropdown-toggle" href="#" id="smallerscreenmenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Menu </a>
                         <div class="dropdown-menu" aria-labelledby="smallerscreenmenu">
                             <a class="dropdown-item" href="/generate">Generate Key</a>
-                            <a class="dropdown-item" href="/sign">Sign Document</a>
-                            <a class="dropdown-item" href="/verify">Verify Document</a>
+                            <a class="dropdown-item" href="/sign/combined">Sign Document</a>
+                            <a class="dropdown-item" href="/verify/combined">Verify Document</a>
                         </div>
                     </li><!-- Smaller devices menu END -->
                 </ul>
@@ -57,13 +57,13 @@
                             <span class="menu-collapsed">Generate Key</span>
                         </div>
                     </a>
-                    <a href="/sign" class="bg-dark list-group-item list-group-item-action">
+                    <a href="/sign/combined" class="bg-dark list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-start align-items-center">
                             <span class="fa fa-key fa-fw mr-3"></span>
                             <span class="menu-collapsed">Sign Document</span>
                         </div>
                     </a>
-                    <a href="/verify" class="bg-dark list-group-item list-group-item-action">
+                    <a href="/verify/combined" class="bg-dark list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-start align-items-center">
                             <span class="fa fa-key fa-fw mr-3"></span>
                             <span class="menu-collapsed">Verify Document</span>
@@ -97,6 +97,21 @@
             }            
             if (document.getElementById('text-file-input')) {
                 document.getElementById('text-file-input').addEventListener('change', handleFileSelect, false);
+            }
+
+            function handleFileSignatureSelect(event) {
+                const reader = new FileReader()
+                reader.onload = handleFileSignatureLoad;
+                reader.readAsText(event.target.files[0])
+            }
+
+            function handleFileSignatureLoad(event) {
+                console.log(event);
+                document.getElementById('text-input-2').value = event.target.result;
+            }
+
+            if (document.getElementById('text-file-input-2')) {
+                document.getElementById('text-file-input-2').addEventListener('change', handleFileSignatureSelect, false);
             }
             
             function handlePublicKeyFileSelect(event) {

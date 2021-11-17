@@ -7,19 +7,14 @@
 {% block body %}
 <!-- MAIN -->
 <div class="col p-4">
-    {% if error %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      {{error}}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    {% endif %}
     <h1 class="display-4">E-Sign Verify Documents</h1>
+    {% if mode=="combined" %}
+    <a class="btn btn-primary" href="/verify/combined" role="button">Verify Combined Sign and Document</a>
+    <a class="btn btn-secondary" href="/verify/seperated" role="button">Verify Seperated Sign and Document</a>
     <div class="card">
         <h5 class="card-header font-weight-light">Requirements</h5>
         <div class="card-body">
-            <form action="/verify" method="POST">
+            <form action="/verify/combined" method="POST">
                 <h6 class="card-header font-weight-light">Public Key = [e, n]</h6>
                 <input type="file" class="form-control-file" name="file" id="public-key-file-input">
                 <div class="form-group">
@@ -51,5 +46,49 @@
             </form>
         </div>
     </div>
+    {% else %}
+    <a class="btn btn-secondary" href="/verify/combined" role="button">Verify Combined Sign and Document</a>
+    <a class="btn btn-primary" href="/verify/seperated" role="button">Verify Seperated Sign and Document</a>
+    <div class="card">
+        <h5 class="card-header font-weight-light">Requirements</h5>
+        <div class="card-body">
+            <form action="/verify/seperated" method="POST">
+                <h6 class="card-header font-weight-light">Public Key = [e, n]</h6>
+                <input type="file" class="form-control-file" name="file" id="public-key-file-input">
+                <div class="form-group">
+                    <label for="text1">e</label>
+                    <input type="number" class="form-control" name="text1" placeholder="Enter value of e here" id=public1 value="{{e}}">
+                </div>
+                <div class="form-group">
+                    <label for="text2">n</label>
+                    <input type="number" class="form-control" name="text2" placeholder="Enter value of n here" id=public2 value="{{n}}">
+                </div>
+                <div class="form-group">
+                    <label for="text3">Document</label>
+                    <textarea name="text3" placeholder="Enter document here" id="text-input">{{document}}</textarea>
+                    <input type="file" class="form-control-file" name="file" id="text-file-input">
+                </div>
+                <div class="form-group">
+                    <label for="text4">Signature</label>
+                    <input type="text" class="form-control" name="text4" placeholder="Enter signature here" id="text-input-2" value="{{signature}}">
+                    <input type="file" class="form-control-file" name="file" id="text-file-input-2">
+                </div>
+                <button type="submit" class="btn btn-primary">Verify Signature and Document</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <h5 class="card-header font-weight-light">Result</h5>
+        <div class="card-body">
+            <form action="/saveresult" method="POST">
+                <div class="form-group">    
+                    <label for="text">Verified Status</label>
+                    <input type="text" readonly class="form-control" name="result" value="{{status}}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div><!-- Main Col END -->
 {% endblock %}

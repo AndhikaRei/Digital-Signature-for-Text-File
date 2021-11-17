@@ -137,3 +137,9 @@ textarea:read-only {
   background-color: #e9ecef;
   resize: true;
 }
+.btn-primary{
+  margin-bottom : 20px;
+}
+.btn-secondary{
+  margin-bottom : 20px;
+}

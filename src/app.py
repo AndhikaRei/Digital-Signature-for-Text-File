@@ -57,16 +57,27 @@ def generate():
 --------------------------------------------------------------
 """
 # Sign Route
-@app.route("/sign", methods=['POST','GET'])
-def sign():
+@app.route("/sign/combined", methods=['POST','GET'])
+def signCombined():
     if request.method == 'POST':
         d = int(request.form['text1'])
         n = int(request.form['text2'])
         text = request.form['text3']
         result = Signature.sign(text, [d,n])
-        return render_template("sign.html", d=d, n=n, document=text, signed=result)
+        return render_template("sign.html", d=d, n=n, document=text, signed=result, mode="combined")
     else:
-        return render_template("sign.html")
+        return render_template("sign.html", mode="combined")
+# Sign Route
+@app.route("/sign/seperated", methods=['POST','GET'])
+def signSeperate():
+    if request.method == 'POST':
+        d = int(request.form['text1'])
+        n = int(request.form['text2'])
+        text = request.form['text3']
+        result = Signature.signOnly(text, [d,n])
+        return render_template("sign.html", d=d, n=n, document=text, signed=result, mode="seperated")
+    else:
+        return render_template("sign.html", mode="seperated")
 
 """
 --------------------------------------------------------------
@@ -74,30 +85,55 @@ def sign():
 --------------------------------------------------------------
 """
 # Sign Route
-@app.route("/verify", methods=['POST','GET'])
-def verify():
+@app.route("/verify/combined", methods=['POST','GET'])
+def verifyCombined():
     if request.method == 'POST':
         e = int(request.form['text1'])
         n = int(request.form['text2'])
         text = request.form['text3']
         try:
-            result = Signature.verify(text, [e,n])
+            result = Signature.verifySignedDocument(text, [e,n])
             if(result):
                 result = "Document Verified"
             else:
                 result = "Document Not Verified"
-            return render_template("verify.html", e=e, n=n, signed_document=text, status=result)
+            return render_template("verify.html", e=e, n=n, signed_document=text, status=result, mode="combined")
         except:
-            return render_template("verify.html", e=e, n=n, signed_document=text, status="Document Not Verified")
+            return render_template("verify.html", e=e, n=n, signed_document=text, status="Document Not Verified", mode="combined")
 
     else:
-        return render_template("verify.html")
+        return render_template("verify.html", mode="combined")
 
+# Sign Route
+@app.route("/verify/seperated", methods=['POST','GET'])
+def verifySeperated():
+    if request.method == 'POST':
+        e = int(request.form['text1'])
+        n = int(request.form['text2'])
+        text = request.form['text3']
+        signature = request.form['text4']
+        try:
+            result = Signature.verifySeparatedSignedDocument(text, signature, [e,n])
+            if(result):
+                result = "Document Verified"
+            else:
+                result = "Document Not Verified"
+            return render_template("verify.html", e=e, n=n, document=text, signature=signature, status=result, mode="seperated")
+        except:
+            return render_template("verify.html", e=e, n=n, document=text, signature=signature, status="Document Not Verified", mode="seperated")
+
+    else:
+        return render_template("verify.html", mode="seperated")
 """
 --------------------------------------------------------------
 # Route for Utility
 --------------------------------------------------------------
 """
+@app.route("/savedocument", methods=['POST'])
+def saveDocument():
+    docs = request.form['docs']
+    return send_file(io.BytesIO(docs.encode()), mimetype="text/plain",as_attachment=True, attachment_filename="document.txt")
+
 @app.route("/saveresult", methods=['POST'])
 def saveResult():
     result = request.form['result']
